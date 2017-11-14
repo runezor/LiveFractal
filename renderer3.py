@@ -127,14 +127,18 @@ def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 
 	return fractal_rec
 	
-if name=="__main__":
+if __name__=="__main__":
 	a=fractal3.mandelbrot()
-	getcontext.prec()=6
+	a.x=a.x+Decimal(0.05)
+	getcontext().prec=6
 	for i in range(1,100):
 		r=a.render(i*100,resx=640,resy=640)
-		a=smart_zoom(a,i*100,r)
-		plt.imsave("1.jpg".sinemap(r))
-		upload(1)
-		if i%3==0: getcontext.prec()+=2
+		a=smart_zoom(a,i*100,render=r,pre=True)
+
+		sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC())
+		plt.imsave("1.jpg",sn)
+		if i%3==0:
+			getcontext().prec+=2
+		upload.upload(1)
 	
 	
