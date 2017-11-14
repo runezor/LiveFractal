@@ -3,12 +3,25 @@ import fractal3
 import numpy as np
 import math
 import operator
+import upload
 from decimal import *
 from random import randint
 
 def sinemap(data,l):
-	siner=lambda t: np.sin(t/math.pi*1/l)+1
-	data=np.array([siner(x) for x in data])
+	def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
+	ret=np.ones(np.append(data.shape,3))
+
+	for x in range(0,data.shape[0]):
+		for y in range(0,data.shape[1]):
+			t=data[x][y]
+
+			ret[x][y][0]=np.sin(t*rC+rOFF)*128+128
+			ret[x][y][1]=np.sin(t*gC+gOFF)*128+128
+			ret[x][y][2]=np.sin(t*bC+bOFF)*128+128
+
+
+	return ret
+
 
 def sub(data,inc=4):
 	h, w = data.shape
@@ -76,8 +89,7 @@ def mask_zoom(fractal,maxiter,pool=3,subs=4.0,resx=256,resy=256):
 
 	return fractal_rec
 
-def smart_zoom(fractal,maxiter,pool=3,resx=256,resy=256):
-	data=fractal.render(maxiter,resx=resx,resy=resy)
+def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 	subdata=sub(data)
 	dif_list=np.empty(16,dtype=object)
 	for i, x in enumerate(subdata):
@@ -114,4 +126,15 @@ def smart_zoom(fractal,maxiter,pool=3,resx=256,resy=256):
 	print("w: "+str(fractal_rec.w))
 
 	return fractal_rec
+	
+if name=="__main__":
+	a=fractal3.mandelbrot()
+	getcontext.prec()=6
+	for i in range(1,100):
+		r=a.render(i*100,resx=640,resy=640)
+		a=smart_zoom(a,i*100,r)
+		plt.imsave("1.jpg".sinemap(r))
+		upload(1)
+		if i%3==0: getcontext.prec()+=2
+	
 	
