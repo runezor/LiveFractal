@@ -28,6 +28,14 @@ def sub(data,inc=4):
 	ncols=int(w/inc)
 	return (data.reshape(h//nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1,nrows,ncols))
 
+def randC():
+	ret=1./random.randint(8000,20000)
+	print(ret)
+	return ret
+
+
+def randOFF():
+	return random.randint(0,1000)/500.-1
 
 def mask_hill(resx,resy,maxiter):
 	return np.fromfunction(lambda x, y: 1.2/(3*((x/resx)*2-1)**2+3*((y/resy)*2-1)**2+1), (resx, resy), dtype=int)
