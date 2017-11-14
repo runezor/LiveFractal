@@ -7,8 +7,7 @@ import upload
 from decimal import *
 from random import randint
 
-def sinemap(data,l):
-	def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
+def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
 	ret=np.ones(np.append(data.shape,3))
 
 	for x in range(0,data.shape[0]):
@@ -132,8 +131,8 @@ if __name__=="__main__":
 	a.x=a.x+Decimal(0.05)
 	getcontext().prec=6
 	for i in range(1,100):
-		r=a.render(i*100,resx=640,resy=640)
-		a=smart_zoom(a,i*100,render=r,pre=True)
+		r=a.render(i*100,resx=64,resy=64)
+		a=smart_zoom(a,i*100,r)
 
 		sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC())
 		plt.imsave("1.jpg",sn)
