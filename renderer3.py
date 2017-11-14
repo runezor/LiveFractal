@@ -5,7 +5,7 @@ import math
 import operator
 import upload
 from decimal import *
-from random import randint
+import random
 
 def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
 	ret=np.ones(np.append(data.shape,3))
@@ -66,8 +66,8 @@ def mask_fit(array,mask):
 		quad+=(a-m_f[i])**2
 	return quad
 
-def mask_zoom(fractal,maxiter,pool=3,subs=4.0,resx=256,resy=256):
-	data=fractal.render(maxiter,resx=resx,resy=resy)
+def mask_zoom(fractal,maxiter,data,pool=3,subs=4.0,resx=256,resy=256):
+	
 	subdata=sub(data,inc=subs)
 	dif_list=np.empty(int(subs)**2,dtype=object)
 	
@@ -79,7 +79,7 @@ def mask_zoom(fractal,maxiter,pool=3,subs=4.0,resx=256,resy=256):
 
 	"""Gives index table"""
 	k=sorted(range(len(dif_list)),key=lambda x: dif_list[x])
-	val=k[len(k)-1-randint(0,pool-1)]
+	val=k[len(k)-1-random.randint(0,pool-1)]
 	print(str(k) + " chose val: "+str(val))
 
 	value=dif_list[val]
@@ -106,7 +106,7 @@ def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 
 	"""Gives index table"""
 	k=sorted(range(len(dif_list)),key=lambda x: dif_list[x])
-	val=k[len(k)-1-randint(0,pool-1)]
+	val=k[len(k)-1-random.randint(0,pool-1)]
 	print(str(k) + " chose val: "+str(val))
 
 	"""val, value=max(enumerate(dif_list), key=operator.itemgetter(1))	"""
@@ -139,8 +139,8 @@ if __name__=="__main__":
 	a.x=a.x+Decimal(0.05)
 	getcontext().prec=6
 	for i in range(1,100):
-		r=a.render(i*100,resx=64,resy=64)
-		a=smart_zoom(a,i*100,r)
+		r=a.render(i*100,resx=2560,resy=2560)
+		a=mask_zoom(a,i*100,r)
 
 		sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC())
 		plt.imsave("1.jpg",sn)
