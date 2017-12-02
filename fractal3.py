@@ -1,6 +1,8 @@
 import numpy as np
+import math
 from decimal import *
 import matplotlib.pyplot as plt
+import threading
 
 def mandelbrot_point(creal,cimag,maxiter):
 	real=creal
@@ -15,26 +17,7 @@ def mandelbrot_point(creal,cimag,maxiter):
 		real=real2-imag2+creal		
 	return 0
 
-def mandelbrot_space(x,y,xsize,ysize,width,height,maxiter):
-	r1=linespace(x-xsize/2, x+xsize/2, width)
-	r2=linespace(y-ysize/2, y+ysize/2, height)	
 
-	real=np.empty((width,height),dtype=object)
-	imag=np.empty((width,height),dtype=object)
-	returning=np.empty((width,height),dtype=int)
-	
-	for i in range(width):
-		for j in range(height):
-			real[i,j]=r1[i]
-			imag[i,j]=r2[j]
-
-	print("arrayspace initialised!")
-
-	for i in range(width):
-		for j in range(height):
-			returning[j,i]=mandelbrot_point(real[i,j],imag[i,j],maxiter)
-
-	return returning
 
 
 
@@ -47,5 +30,49 @@ class mandelbrot:
 	y=Decimal(0)
 	w=Decimal(2)
 	h=Decimal(2)
-	def render(self,maxiter,resx=512,resy=512):
-		return(mandelbrot_space(self.x,self.y,self.w,self.h,resx,resy,maxiter))
+	
+	real=np.empty((512,512),dtype=object)
+	imag=np.empty((512,512),dtype=object)
+	space=np.empty((512,512),dtype=int)
+
+	def render(self,maxiter,resx=512,resy=512,threadCount=4):
+		self.mandelbrot_space_init(resx,resy)
+	
+		threads={}
+		for i in range(threadCount):
+			threads[i]=threading.Thread(target=self.mandelbrot_space,args=[resx,resy,maxiter,threadCount,i])
+	
+		for i in range(threadCount):
+			threads[i].start()
+
+		for i in range(threadCount):
+			threads[i].join()
+
+		
+		"""self.mandelbrot_space(resx,resy,maxiter,1,0)"""
+
+		return (self.space)
+
+	def mandelbrot_space_init(self,width,height):
+		r1=linespace(self.x-self.w/2, self.x+self.w/2, width)
+		r2=linespace(self.y-self.h/2, self.y+self.h/2, height)
+
+		self.real=np.empty((width,height),dtype=object)
+		self.imag=np.empty((width,height),dtype=object)
+
+		self.space=np.empty((height,width),dtype=int)
+
+		for i in range(width):
+			for j in range(height):
+				self.real[i,j]=r1[i]
+				self.imag[i,j]=r2[j]
+
+		print("arrayspace initialised!")
+	
+	def mandelbrot_space(self,width,height,maxiter,threadCount,id):
+		for i in range(id, width, threadCount):
+			for j in range(height):
+				self.space[j,i]=mandelbrot_point(self.real[i,j],self.imag[i,j],maxiter)
+			if math.floor((i/width)*100) != math.floor(((i-1)/width)*100):
+				print(str(id+1)+": "+str(math.floor((i/width)*100))+"%")
+
