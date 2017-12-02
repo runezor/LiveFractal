@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
-import fractal3
+import fractal4
 import numpy as np
 import math
 import operator
 import upload
 from decimal import *
 import random
+
 
 def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500,mode=0):
 	ret=np.ones(np.append(data.shape,3))
@@ -105,7 +106,7 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 
 	print("x: "+str(x)+"; y: "+str(y))
 
-	fractal_rec=fractal3.mandelbrot()
+	fractal_rec=fractal4.mandelbrot()
 	fractal_rec.x=fractal.x+Decimal((-(subx-1)+2.0*x)/(subx*2)) * fractal.w
 	fractal_rec.y=fractal.y+Decimal((-(suby-1)+2.0*y)/(suby*2)) * fractal.h
 	fractal_rec.w=fractal.w/Decimal(4)
@@ -138,7 +139,7 @@ def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 	print("Interesting y: "+str(y))
 	print(fractal.w)
 
-	fractal_rec=fractal3.mandelbrot()
+	fractal_rec=fractal4.mandelbrot()
 
 	fractal_rec.x=fractal.x+Decimal((-3.0+2.0*x)/8.0) * fractal.w
 	fractal_rec.y=fractal.y+Decimal((-3.0+2.0*y)/8.0) * fractal.h
@@ -152,15 +153,15 @@ def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 	return fractal_rec
 	
 if __name__=="__main__":
-	a=fractal3.mandelbrot()
-	a.x=a.x+Decimal(1)
-	a.y=a.y+Decimal(1)
-	a.w=Decimal(2.0)
-	a.h=Decimal(4.0)
+	a=fractal4.mandelbrot()
+	a.x=a.x
+	a.y=a.y
+	a.w=Decimal(8.0)
+	a.h=Decimal(16.0)
 	getcontext().prec=6
 	for i in range(1,100):
-		r=a.render(i*80,resx=1080,resy=2160)
-		a=mask_zoom(a,i*80,r,resx=1080,resy=2160)
+		r=a.render(i*80,resx=108*4,resy=216*4)
+		a=mask_zoom(a,i*80,r,resx=108*4,resy=216*4,pool=4)
 
 		sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC(),mode=random.randint(0,3))
 		plt.imsave("1.jpg",sn)
