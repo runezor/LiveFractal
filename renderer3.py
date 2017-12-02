@@ -17,12 +17,12 @@ def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500,mode
 			"""Creative functions"""
 			if mode==0:
 				t=data[x][y]
-			if mode==1:	
-				t=data[x][y]**0.5
+			if mode==1:
+				t=math.sqrt(data[x][y]+0.0)
 			if mode==2:
 				t=data[x][y]**2/100
 			if mode==3:
-				t=np.log(data[x][y])
+				t=np.log(data[x][y]+1)
 
 			ret[x][y][0]=np.sin(t*rC+rOFF)*128+128
 			ret[x][y][1]=np.sin(t*gC+gOFF)*128+128
@@ -41,7 +41,7 @@ def sub(data,incc=2,incr=4):
 def randC():
 	exp=random.randint(0,6)
 	ret=1./random.randint(32*5**exp,80*5**exp)
-	print(ret)
+	
 	return ret
 
 
@@ -85,18 +85,18 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 
 	mask=mask_hill(int(resx/subx),int(resy/suby),maxiter)
 
-	print(subdata[0].shape);	
-	print(mask.shape);
+	"""print(subdata[0].shape);	
+	print(mask.shape);"""
 
 	for i, x in enumerate(subdata):
 		dif_list[i]=mask_fit(x,mask)
 	
-	print(dif_list)
+	"""print(dif_list)"""
 
 	"""Gives index table"""
 	k=sorted(range(len(dif_list)),key=lambda x: dif_list[x])
 	val=k[len(k)-1-random.randint(0,pool-1)]
-	print(str(k) + " chose val: "+str(val))
+	"""print(str(k) + " chose val: "+str(val))"""
 
 	value=dif_list[val]
 
@@ -104,7 +104,7 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 	x=(val)%subx
 	y=(val-x)/subx
 
-	print("x: "+str(x)+"; y: "+str(y))
+	"""print("x: "+str(x)+"; y: "+str(y))"""
 
 	fractal_rec=fractal4.mandelbrot()
 	fractal_rec.x=fractal.x+Decimal((-(subx-1)+2.0*x)/(subx*2)) * fractal.w
@@ -160,8 +160,8 @@ if __name__=="__main__":
 	a.h=Decimal(16.0)
 	getcontext().prec=6
 	for i in range(1,100):
-		r=a.render(i*80,resx=108*4,resy=216*4)
-		a=mask_zoom(a,i*80,r,resx=108*4,resy=216*4,pool=4)
+		r=a.render(i*80,resx=1080,resy=2160)
+		a=mask_zoom(a,i*80,r,resx=1080,resy=2160,pool=4)
 
 		sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC(),mode=random.randint(0,3))
 		plt.imsave("1.jpg",sn)

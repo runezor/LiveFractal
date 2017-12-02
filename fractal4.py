@@ -38,27 +38,35 @@ class mandelbrot:
 
 	def render(self,maxiter,resx=512,resy=512,threadCount=4):
 		self.mandelbrot_space_init(resx,resy)
-	
+
 		threads={}
 		queues={}
+
 		for i in range(threadCount):
 			queues[i]=Queue()
-			threads[i]=Process(target=self.mandelbrot_space,args=[self.space,resx,resy,maxiter,threadCount,i,queues[i]])
+			threads[i]=Process(target=self.mandelbrot_space,args=[self.space,self.real,self.imag,resx,resy,maxiter,threadCount,i,queues[i]])
 	
+
 		for i in range(threadCount):
 			threads[i].start()
+		
+
+
 
 		for i in range(threadCount):
 			self.space=np.add(self.space,queues[i].get())
+			print("Adding que: " + str(i+1));
+
 
 		for i in range(threadCount):
 			threads[i].join()
 
-
-
+		for i in range(threadCount):
+			threads[i].terminate()
 		
 		"""self.mandelbrot_space(resx,resy,maxiter,1,0)"""
 
+		print("Render succesful")
 		return (self.space)
 
 	def mandelbrot_space_init(self,width,height):
@@ -68,7 +76,7 @@ class mandelbrot:
 		self.real=np.empty((width,height),dtype=object)
 		self.imag=np.empty((width,height),dtype=object)
 
-		self.space=np.empty((height,width),dtype=int)
+		self.space=np.zeros((height,width),dtype=int)
 
 		for i in range(width):
 			for j in range(height):
@@ -76,17 +84,18 @@ class mandelbrot:
 				self.imag[i,j]=r2[j]
 
 		print("arrayspace initialised!")
+		
 	
-	def mandelbrot_space(self,space_size,width,height,maxiter,threadCount,id,queue_id):
+	def mandelbrot_space(self,space_size,reals,imags,width,height,maxiter,threadCount,id,queue_id):
 		returning=space_size
-		print(returning.shape)
+
 		for i in range(id, width, threadCount):
 			for j in range(height):
-				returning[j,i]=mandelbrot_point(self.real[i,j],self.imag[i,j],maxiter)
-			if math.floor((i/width)*100) != math.floor(((i-1)/width)*100):
+				returning[j,i]=mandelbrot_point(reals[i,j],imags[i,j],maxiter)
+			if math.floor((i/width)*10) != math.floor(((i-1)/width)*10):
 				print(str(id+1)+": "+str(math.floor((i/width)*100))+"%")
 
-		
+		print(str(id+1)+" done!");
 		queue_id.put(returning)
 		
 
