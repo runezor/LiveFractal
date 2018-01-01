@@ -12,5 +12,5 @@ def upload(x,y,w,h):
 	print("Uploading...")
 	with open('1.jpg','rb') as fp:
 		myfiles={'fileToUpload': fp}
-		r=requests.post(url,files=myfiles,data={'code': 'secret', 'dbx': x, 'dby': y, 'dbw': w, 'dbh': h},verify=True)
+		r=requests.post(url,files=myfiles,data={'code': 'sec-ret', 'dbx': x, 'dby': y, 'dbw': w, 'dbh': h},verify=True)
 	print(r.text)
