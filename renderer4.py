@@ -228,7 +228,7 @@ if __name__=="__main__":
 		"""sn=sinemap(asort,randOFF(),randC()*0.999**i,randOFF(),randC()*0.999**i,randOFF(),randC()*0.999**i)"""
 		"""sn=polymap(r,i)"""
 
-		maps=["hot","seismic","Spectral","PuOr","flag","prism","gnuplot2","gnuplot","nipy_spectral","gist_ncar","cool","gist_heat","PiYG","PRGn","RdBu","coolwarm","RdYlGn","cool","plasma","inferno","magma"]
+		maps=["hot","seismic","Spectral","PuOr","gnuplot2","gnuplot","nipy_spectral","gist_ncar","cool","gist_heat","PiYG","PRGn","RdBu","coolwarm","RdYlGn","plasma","inferno","magma","nipy_spectral","jet","gist_earth"]
 
 		"""Sin funktion"""
 
