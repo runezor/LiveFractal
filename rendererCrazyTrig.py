@@ -8,22 +8,17 @@ from decimal import *
 import random
 
 
-def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500,mode=0):
-	ret=np.ones(np.append(data.shape,3))
+def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
+	ret=np.zeros(np.append(data.shape,3))
 
 
 	for x in range(0,data.shape[0]):
 		for y in range(0,data.shape[1]):
-			"""Creative functions"""
-			if mode==0:
-				t=data[x][y]
-			if mode==1:
-				t=data[x][y]**2/100
-
-			ret[x][y][0]=np.sin(t*rC+rOFF)*128+128
-			ret[x][y][1]=np.sin(t*gC+gOFF)*128+128
-			ret[x][y][2]=np.sin(t*bC+bOFF)*128+128
-
+			t=math.log(data[x][y]+1)
+			ret[x][y][0]=np.sin(t*rC+rOFF)*0.5+0.5
+			ret[x][y][1]=np.sin(t*gC+gOFF)*0.5+0.5
+			ret[x][y][2]=np.sin(t*bC+bOFF)*0.5+0.5
+			
 
 	return ret
 
@@ -35,8 +30,9 @@ def sub(data,incc=2,incr=4):
 	return (data.reshape(h//nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1,nrows,ncols))
 
 def randC():
-	exp=random.randint(0,6)
-	ret=1./random.randint(32*5**exp,80*5**exp)
+	exp=random.randint(1,2)
+	print(exp)
+	ret=1./random.randint(10**exp,10**(exp+1))
 	
 	return ret
 
@@ -57,7 +53,7 @@ def diff(data,maxiter):
 	returning=data_size
 
 	for x in data.flat:
-		graph[x]+=1
+		graph[int(x)]+=1
 
 	for x in graph:
 		returning-=abs(data_size/maxiter-x)
@@ -85,7 +81,7 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 	print(mask.shape);"""
 
 	for i, x in enumerate(subdata):
-		dif_list[i]=mask_fit(x,mask)
+		dif_list[i]=mask_fit(int(x),mask)
 	
 	"""print(dif_list)"""
 
@@ -111,7 +107,7 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 	return fractal_rec
 
 def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
-	subdata=sub(data)
+	subdata=sub(data,incr=4,incc=4)
 	dif_list=np.empty(16,dtype=object)
 	for i, x in enumerate(subdata):
 		dif_list[i]=diff(x,maxiter)
@@ -166,10 +162,12 @@ if __name__=="__main__":
 		dbh=str(a.h)
 
 		r=a.render(i*80,resx=108*2,resy=216*2,threadCount=i_threads)
-		a=mask_zoom(a,i*80,r,resx=108*2,resy=216*2,pool=4)
+		a=smart_zoom(a,i*80*1000,(r*10000).astype(int),resx=108*2,resy=216*2)
 
-		"""sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC(),mode=random.randint(0,1))"""
-		plt.imsave("1.jpg",r)
+		sn=sinemap(r,randOFF(),2,randOFF(),3,randOFF(),4)
+		
+
+		plt.imsave("1.jpg",sn)
 		if i%3==0:
 			getcontext().prec+=2
 		upload.upload(dbx,dby,dbw,dbh)

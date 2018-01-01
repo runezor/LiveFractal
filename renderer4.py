@@ -8,22 +8,34 @@ from decimal import *
 import random
 
 
-def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500,mode=0):
-	ret=np.ones(np.append(data.shape,3))
+def sinemap(data,rOFF=2.1,rC=1./1000,gOFF=-3.5,gC=1./500,bOFF=5.,bC=1./3500):
+	ret=np.zeros(np.append(data.shape,3))
 
 
 	for x in range(0,data.shape[0]):
 		for y in range(0,data.shape[1]):
-			"""Creative functions"""
-			if mode==0:
-				t=data[x][y]
-			if mode==1:
-				t=data[x][y]**2/100
+			t=math.log(data[x][y]+1)
+			ret[x][y][0]=np.sin(t*rC+rOFF)*0.5+0.5
+			ret[x][y][1]=np.sin(t*gC+gOFF)*0.5+0.5
+			ret[x][y][2]=np.sin(t*bC+bOFF)*0.5+0.5
+			
 
-			ret[x][y][0]=np.sin(t*rC+rOFF)*128+128
-			ret[x][y][1]=np.sin(t*gC+gOFF)*128+128
-			ret[x][y][2]=np.sin(t*bC+bOFF)*128+128
+	return ret
 
+def sortmap(data):
+	return np.argsort(data)
+
+def polymap(data,zoom):
+	ret=np.zeros(np.append(data.shape,3))
+
+
+	for x in range(0,data.shape[0]):
+		for y in range(0,data.shape[1]):
+			t=math.log(data[x][y]+1)
+			ret[x][y][0]=1*(1-t)*t**3*(0.4**(1+zoom))+0
+			ret[x][y][1]=1*(1-t)*t**3*(0.4**(2+zoom))
+			ret[x][y][2]=1*(1-t)*t**3*(0.4**(3+zoom))
+			
 
 	return ret
 
@@ -35,8 +47,8 @@ def sub(data,incc=2,incr=4):
 	return (data.reshape(h//nrows, nrows, -1, ncols).swapaxes(1,2).reshape(-1,nrows,ncols))
 
 def randC():
-	exp=random.randint(0,6)
-	ret=1./random.randint(32*5**exp,80*5**exp)
+	exp=random.randint(0,5)
+	ret=random.randint(0,1000)/(1000.0)*(10**exp)
 	
 	return ret
 
@@ -148,6 +160,22 @@ def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 
 	return fractal_rec
 	
+def array_sort(a):
+
+	shape=a.shape
+
+
+	b=a.flatten()
+	c=np.argsort(b)
+	e=np.zeros(c.size)
+
+	
+	for index, i in enumerate(c):
+		e[i]=index
+	d=e.reshape(shape)
+
+	return d
+
 if __name__=="__main__":
 
 	print("How many threads to use?")
@@ -160,18 +188,63 @@ if __name__=="__main__":
 	a.h=Decimal(16.0)
 	getcontext().prec=6
 	for i in range(1,2048):
+		w=1080
+		h=2160
+
+
 		dbx=str(a.x)
 		dby=str(a.y)
 		dbw=str(a.w)
 		dbh=str(a.h)
 
-		r=a.render(i*80,resx=108*2,resy=216*2,threadCount=i_threads)
-		a=mask_zoom(a,i*80,r,resx=108*2,resy=216*2,pool=4)
+		r=a.render(i*80,resx=w,resy=h,threadCount=i_threads)
+		a=mask_zoom(a,i*80,r,resx=w,resy=h,pool=4)
+		r=r.astype(float)
 
-		"""sn=sinemap(r,randOFF(),randC(),randOFF(),randC(),randOFF(),randC(),mode=random.randint(0,1))"""
-		plt.imsave("1.jpg",r)
+		"""Forhindrer log(0)"""
+		shape=r.shape
+		r=r.flatten()
+		for index, u in enumerate(r):
+			if u==0:
+				r[index]=1
+		r=r.reshape(shape)
+
+
+		r=np.log(r)
+		asort=array_sort(r)
+
+		
+		"""Fikser weird mønstre"""
+		asort=asort.flatten()
+		for index, u in enumerate(r.flatten()):
+			if u==0:
+				asort[index]=w*h
+
+		asort=asort.reshape(r.shape)
+
+
+
+
+		"""sn=sinemap(asort,randOFF(),randC()*0.999**i,randOFF(),randC()*0.999**i,randOFF(),randC()*0.999**i)"""
+		"""sn=polymap(r,i)"""
+
+		maps=["hot","seismic","Spectral","PuOr","flag","prism","gnuplot2","gnuplot","nipy_spectral","gist_ncar","cool","gist_heat","PiYG","PRGn","RdBu","coolwarm","RdYlGn","cool","plasma","inferno","magma"]
+
+		"""Sin funktion"""
+
+		"""plt.imsave("1.jpg",sn,cmap=plt.get_cmap(maps[random.randint(0,len(maps)-1)]))"""
+		plt.imsave("1.jpg",asort,cmap=plt.get_cmap(maps[random.randint(0,len(maps)-1)]))
+
+
 		if i%3==0:
 			getcontext().prec+=2
+			print("context: "+str(getcontext().prec))
+
+
+		
 		upload.upload(dbx,dby,dbw,dbh)
+		print("i: "+str(i))
 	
+	
+
 	

@@ -8,9 +8,9 @@ path="/mandelbrot/upload.php"
 
 url = "http://%s%s" % (host, path)
 
-def upload(i):
+def upload(x,y,w,h):
 	print("Uploading...")
-	with open(str(i)+'.jpg','rb') as fp:
+	with open('1.jpg','rb') as fp:
 		myfiles={'fileToUpload': fp}
-		r=requests.post(url,files=myfiles,verify=True)
+		r=requests.post(url,files=myfiles,data={'code': 'secret', 'dbx': x, 'dby': y, 'dbw': w, 'dbh': h},verify=True)
 	print(r.text)
