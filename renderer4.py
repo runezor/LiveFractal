@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+import matplotlib.cbook as cbook
 import fractal5
 import numpy as np
 import math
 import operator
 import upload
+import uploadMAP
 from decimal import *
 import random
 
@@ -51,6 +54,23 @@ def randC():
 	ret=random.randint(0,1000)/(1000.0)*(10**exp)
 	
 	return ret
+
+def generate_map(x,y):
+	img=plt.imread('basemap.png')
+	drawx=(float(x)+1.5)*64
+	drawy=(float(y)+1)*64
+
+
+	fig=plt.figure();
+	ax=plt.Axes(fig, [0.,0.,1.,1.])
+	ax.set_axis_off()
+	fig.add_axes(ax)
+
+	ax.imshow(img, aspect='equal')
+
+	circ=Circle((drawx,drawy),4, color='r')
+	ax.add_patch(circ)
+	plt.savefig('pointer.png',bbox_inches='tight', pad_inches=0)
 
 
 def randOFF():
@@ -197,6 +217,9 @@ if __name__=="__main__":
 		dbw=str(a.w)
 		dbh=str(a.h)
 
+		mx=a.x
+		my=a.y
+
 		r=a.render(i*80,resx=w,resy=h,threadCount=i_threads)
 		a=mask_zoom(a,i*80,r,resx=w,resy=h,pool=4)
 		r=r.astype(float)
@@ -244,7 +267,8 @@ if __name__=="__main__":
 		
 		upload.upload(dbx,dby,dbw,dbh)
 		print("i: "+str(i))
-	
+		generate_map(mx,my)
+		uploadMAP.upload()
 	
 
 	
