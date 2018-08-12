@@ -142,6 +142,8 @@ def mask_zoom(fractal,maxiter,data,pool=3,subx=8.0,suby=16.0,resx=256,resy=256):
 
 	return fractal_rec
 
+
+
 def smart_zoom(fractal,maxiter,data,pool=3,resx=256,resy=256):
 	subdata=sub(data)
 	dif_list=np.empty(16,dtype=object)
@@ -196,6 +198,39 @@ def array_sort(a):
 
 	return d
 
+
+
+def rand_zoom(fractal, maxiter, data, pool=3, subx=8.0, suby=16.0, resx=256, resy=256):
+	subdata = sub(data, incc=subx, incr=suby)
+	dif_list = []
+
+	nonNullData = []
+
+	for i, data in enumerate(subdata):
+		if np.var(data)>=0.1:
+			nonNullData.append({"data": data, "indexVal": i})
+
+
+
+
+
+	val = nonNullData[random.randint(0,len(nonNullData))]["indexVal"]
+
+	"""Finds x and y"""
+	x = (val) % subx
+	y = (val - x) / subx
+
+	"""print("x: "+str(x)+"; y: "+str(y))"""
+
+	fractal_rec = fractal5.mandelbrot()
+	fractal_rec.x = fractal.x + Decimal((-(subx - 1) + 2.0 * x) / (subx * 2)) * fractal.w
+	fractal_rec.y = fractal.y + Decimal((-(suby - 1) + 2.0 * y) / (suby * 2)) * fractal.h
+	fractal_rec.w = fractal.w / Decimal(4)
+	fractal_rec.h = fractal.h / Decimal(4)
+
+	return fractal_rec
+
+
 if __name__=="__main__":
 
 	print("How many threads to use?")
@@ -221,7 +256,7 @@ if __name__=="__main__":
 		my=a.y
 
 		r=a.render(i*80,resx=w,resy=h,threadCount=i_threads)
-		a=mask_zoom(a,i*80,r,resx=w,resy=h,pool=4)
+		a=rand_zoom(a,i*80,r,resx=w,resy=h,pool=4)
 		r=r.astype(float)
 
 		"""Forhindrer log(0)"""
